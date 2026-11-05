@@ -44,7 +44,7 @@ def to_text(rep: dict) -> str:
           "3. SELECTED CLEANING METHODS"]
     c = rep["config"]
     L += [f"  Text: {c.get('text') or '-'}", f"  Dates: {c.get('dates') or '-'}",
-          f"  Types: {c.get('types') or '-'}", f"  Duplicates: {c.get('duplicates') or '-'}",
+          f"  Types: {c.get('types') or '-'}", f"  Date/time options: {c.get('type_options') or '-'}",
           f"  Missing: {c.get('missing') or '-'}", f"  Outliers: {c.get('outliers') or '-'}",
           f"  Rename columns: {c.get('rename') or '-'}", f"  Replace values: {c.get('replace') or '-'}",
           f"  Drop columns: {c.get('drop_columns') or '-'}", "",

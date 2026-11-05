@@ -33,7 +33,7 @@ def validate_config(config: dict, df: pd.DataFrame) -> list:
     """Return warnings about config entries that reference unknown columns."""
     cols = set(df.columns)
     issues = []
-    for section in ("missing", "types", "outliers", "rename", "replace", "drop_columns"):
+    for section in ("missing", "types", "outliers", "rename", "replace", "drop_columns", "type_options"):
         for c in config.get(section, {}):
             if c not in cols:
                 issues.append(f"Column '{c}' in '{section}' does not exist.")

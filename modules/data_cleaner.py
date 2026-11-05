@@ -28,7 +28,7 @@ def _changed(a: pd.Series, b: pd.Series) -> int:
 
 def default_config() -> dict:
     return {"text": {}, "types": {}, "dates": {}, "duplicates": {"enabled": False},
-            "missing": {}, "outliers": {}, "rename": {}, "replace": {}, "drop_columns": []}
+            "missing": {}, "outliers": {}, "rename": {}, "replace": {}, "drop_columns": [], "type_options": {}}
 
 
 # ---------------------------------------------------------------- missing values
@@ -121,6 +121,18 @@ def clean_text(df, columns, strip=True, collapse=True, case="none"):
 
 # ---------------------------------------------------------------- types
 TYPE_OPTIONS = ["Integer", "Float", "String", "Boolean", "Category", "Datetime", "Date", "Time", "Object"]
+_DATE_FMTS = {"Keep as {} type": None, "2024-01-31  (%Y-%m-%d)": "%Y-%m-%d", "31/01/2024  (%d/%m/%Y)": "%d/%m/%Y",
+              "01/31/2024  (%m/%d/%Y)": "%m/%d/%Y", "31-01-2024  (%d-%m-%Y)": "%d-%m-%Y",
+              "31 Jan 2024  (%d %b %Y)": "%d %b %Y"}
+_TIME_FMTS = {"14:30  (%H:%M)": "%H:%M", "14:30:05  (%H:%M:%S)": "%H:%M:%S", "02:30 PM  (%I:%M %p)": "%I:%M %p"}
+DATE_FORMATS = {
+    "Date": {k.format("date"): v for k, v in _DATE_FMTS.items()},
+    "Datetime": {**{k.format("datetime"): v for k, v in _DATE_FMTS.items()},
+                 "2024-01-31 14:30  (%Y-%m-%d %H:%M)": "%Y-%m-%d %H:%M",
+                 "2024-01-31 14:30:05  (%Y-%m-%d %H:%M:%S)": "%Y-%m-%d %H:%M:%S",
+                 "31/01/2024 14:30  (%d/%m/%Y %H:%M)": "%d/%m/%Y %H:%M"},
+    "Time": {"Keep as time type": None, **_TIME_FMTS},
+}
 _BOOL_MAP = {"true": True, "t": True, "yes": True, "y": True, "ya": True, "1": True, "1.0": True,
              "false": False, "f": False, "no": False, "n": False, "tidak": False, "0": False, "0.0": False}
 
@@ -147,8 +159,9 @@ def current_type_label(s: pd.Series) -> str:
     return "Object"
 
 
-def convert_type(s: pd.Series, target: str):
-    """Return (converted series or None if refused, message, level)."""
+def convert_type(s: pd.Series, target: str, dayfirst: bool = False, out_format=None):
+    """Return (converted series or None if refused, message, level).
+    dayfirst / out_format only apply to Date, Datetime and Time. A text out_format turns the result into text."""
     na_before = int(s.isna().sum())
     try:
         if target == "String":
@@ -162,10 +175,16 @@ def convert_type(s: pd.Series, target: str):
             if len(txt) and txt.map(lambda v: isinstance(v, str) and bool(TIME_ONLY.match(v))).mean() >= 0.9:
                 return None, ("Conversion to Datetime refused: the values contain a time only, so today's date "
                               "would be filled in. Use the Time type instead."), "warning"
-            res = parse_dates(s)
+            parsed = parse_dates(s, dayfirst=dayfirst)
+            res = parsed.dt.strftime(out_format).where(parsed.notna(), np.nan) if out_format else parsed
+        elif target == "Time" and current_type_label(s) == "Time":  # already time objects: only reformat
+            res = s.map(lambda v: v.strftime(out_format) if out_format and isinstance(v, dt.time) else v)
         elif target in ("Date", "Time"):
-            parsed = parse_dates(s)
-            res = (parsed.dt.date if target == "Date" else parsed.dt.time).where(parsed.notna(), np.nan)
+            parsed = parse_dates(s, dayfirst=dayfirst)
+            if out_format:
+                res = parsed.dt.strftime(out_format).where(parsed.notna(), np.nan)
+            else:
+                res = (parsed.dt.date if target == "Date" else parsed.dt.time).where(parsed.notna(), np.nan)
         elif target == "Boolean":
             res = s.map(lambda v: pd.NA if pd.isna(v) else _BOOL_MAP.get(str(v).strip().lower(), pd.NA)
                         ).astype("boolean")
@@ -183,15 +202,21 @@ def convert_type(s: pd.Series, target: str):
     new_na = int(res.isna().sum()) - na_before
     if new_na > 0:
         return res, f"Converted to {target}; {new_na} value(s) could not be converted and became missing", "warning"
+    if out_format and target in ("Date", "Datetime", "Time"):
+        return res, f"Converted to {target} and formatted as text ({out_format})", "info"
     return res, f"Converted to {target} without data loss", "info"
 
 
-def convert_types(df, mapping: dict):
+def convert_types(df, mapping: dict, options: dict = None):
+    """mapping = {column: target type}; options = {column: {"dayfirst": bool, "format": strftime or None}}."""
     out, log = df.copy(), []
     for c, target in mapping.items():
-        if c not in out.columns or target in (None, "No change") or current_type_label(out[c]) == target:
+        opt = (options or {}).get(c, {})
+        if c not in out.columns or target in (None, "No change"):
             continue
-        res, msg, level = convert_type(out[c], target)
+        if current_type_label(out[c]) == target and not opt.get("format"):
+            continue
+        res, msg, level = convert_type(out[c], target, opt.get("dayfirst", False), opt.get("format"))
         if res is None:
             log.append(_entry("Type Conversion", c, 0, msg, level))
             continue
@@ -281,7 +306,7 @@ def run_pipeline(df: pd.DataFrame, config: dict):
         out, l = clean_dates(out, d["columns"], d.get("format", "%Y-%m-%d"), d.get("dayfirst", False))
         log += l
     if config.get("types"):
-        out, l = convert_types(out, config["types"])
+        out, l = convert_types(out, config["types"], config.get("type_options"))
         log += l
     dup = config.get("duplicates") or {}
     if dup.get("enabled"):

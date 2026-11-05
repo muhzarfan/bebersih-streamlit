@@ -46,7 +46,7 @@ def cached_exports(df):
 def cached_outliers(df):
     return od.summarize(df)
 
-WIDGET_PREFIXES = ("mv_", "mvv_", "dup_", "tx_", "ty_", "dt_", "rn_", "rnsel", "rpsel", "ex_", "dcsel", "dcthr")
+WIDGET_PREFIXES = ("mv_", "mvv_", "dup_", "tx_", "ty_", "dt_", "rn_", "rnsel", "rpsel", "ex_", "dcsel", "dcthr", "tyd_", "tyf_")
 MAX_UNIQUE_REPLACE = 200
 
 def reset_results():
@@ -231,7 +231,7 @@ def page_cleaning():
     cfg = dc.default_config()
     cfg["outliers"] = dict(st.session_state.config.get("outliers", {}))
     cols = list(df.columns)
-    t = st.tabs(["Missing Values", "Duplicates", "Text", "Data Types", "Dates", "Outliers", "Rename & Replace", "Drop Columns"])
+    t = st.tabs(["Missing Values", "Duplicates", "Text", "Data Types", "Outliers", "Rename & Replace", "Drop Columns"])
     with t[0]:
         miss_cols = [c for c in cols if df[c].isna().any()]
         if not miss_cols:
@@ -260,27 +260,32 @@ def page_cleaning():
                            "collapse": st.checkbox("Collapse repeated spaces", True, key="tx_c"),
                            "case": cases}
     with t[3]:
-        st.caption("Each dropdown starts at the column's current type. Leave it unchanged to keep the column as is.")
+        st.caption("Each dropdown starts at the column's current type. Leave it unchanged to keep the column as is. "
+                   "Choosing Date, Datetime or Time shows extra options for reading and formatting the values.")
         pick = st.multiselect("Columns to convert", cols, key="ty_cols")
         for c in pick:
             cur = dc.current_type_label(df[c])
             st.session_state.setdefault(f"ty_{c}", cur)
             to = st.selectbox(f"{c} (current type: {cur}, dtype {df[c].dtype})", dc.TYPE_OPTIONS, key=f"ty_{c}")
-            if to != cur:
+            opts = {}
+            if to in dc.DATE_FORMATS:
+                if to != "Time":
+                    opts["dayfirst"] = st.checkbox("Day-first (05/02/2024 = 5 Feb instead of 2 May)", key=f"tyd_{c}")
+                fmts = dc.DATE_FORMATS[to]
+                opts["format"] = fmts[st.selectbox(f"Output format for {c}", list(fmts), key=f"tyf_{c}")]
+                if opts["format"]:
+                    st.caption("A text format turns this column into text. It can no longer be used for date calculations.")
+            if to != cur or opts.get("format"):
                 cfg["types"][c] = to
+                if opts:
+                    cfg["type_options"][c] = opts
     with t[4]:
-        dcols = st.multiselect("Date columns", cols, key="dt_cols")
-        if dcols:
-            fmt = st.selectbox("Output format", ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%d %b %Y"], key="dt_f")
-            first = st.checkbox("Treat ambiguous dates as day-first (e.g. 05/02/2024 = 5 Feb)", key="dt_d")
-            cfg["dates"] = {"columns": dcols, "format": fmt, "dayfirst": first}
-    with t[5]:
         if cfg["outliers"]:
             st.write("Plan chosen on the Outlier Detection page:")
             st.table(pd.DataFrame({"Column": list(cfg["outliers"]), "Action": list(cfg["outliers"].values())}))
         else:
             st.info("All outliers are kept. Set a plan on the Outlier Detection page to change this.")
-    with t[6]:
+    with t[5]:
         st.subheader("Rename columns")
         st.caption("Leave a field empty to keep the original name. Renaming is applied last, after all other steps.")
         rn_sel = st.multiselect("Columns to rename", cols, key="rnsel")
@@ -312,7 +317,7 @@ def page_cleaning():
             if rules:
                 cfg["replace"][c] = rules
         st.session_state.replace_saved = saved_rules
-    with t[7]:
+    with t[6]:
         st.caption("Dropped columns are removed first, so settings for them in other tabs are ignored, and "
                    "duplicates are detected on the remaining columns.")
         miss_pct = df.isna().mean().mul(100).round(2)
