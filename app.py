@@ -246,7 +246,7 @@ def page_cleaning():
     with t[1]:
         if st.checkbox("Remove duplicate rows", key="dup_on"):
             sub = st.multiselect("Columns used to detect duplicates (empty = all columns)", cols, key="dup_sub")
-            keep = st.radio("Keep", ["First", "Last"], horizontal=True, key="dup_keep")
+            keep = st.radio("Keep", ["first", "last"], horizontal=True, key="dup_keep")
             cfg["duplicates"] = {"enabled": True, "subset": sub, "keep": keep}
     with t[2]:
         tcols = st.multiselect("Columns to clean", [c for c in cols if is_text_dtype(df[c])], key="tx_cols")
