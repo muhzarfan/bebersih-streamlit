@@ -38,14 +38,10 @@ modules/data_validator.py       Validation of datasets and cleaning configuratio
 modules/report_generator.py     Before/after metrics and report text
 utils/helpers.py                Shared helpers
 utils/export.py                 CSV / Excel / text export and file name sanitising
-tests/                          Pytest unit tests
-sample_messy_data.csv           Example dataset to try the app
 ```
 
 ## Installation
 ```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 Streamlit 1.50 or newer is required.
@@ -53,11 +49,10 @@ Streamlit 1.50 or newer is required.
 ## Run
 ```bash
 streamlit run app.py
-python -m pytest                 # run the unit tests
 ```
 
 ## Example Usage
-1. **Dashboard:** upload `sample_messy_data.csv` (or your own file).
+1. **Dashboard:** upload your own dataset file.
 2. **Data Quality Analysis:** review missing values, duplicates, whitespace, capitalisation variants and mixed date formats.
 3. **Outlier Detection:** inspect the boxplot and records, then choose Keep, Remove or Capping per column.
 4. **Data Cleaning:** work through the tabs (Missing Values, Duplicates, Text, Data Types, Dates, Outliers, Rename & Replace), review the preview, confirm if rows may be removed, then click Apply cleaning.
