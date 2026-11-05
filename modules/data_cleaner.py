@@ -27,7 +27,7 @@ def _changed(a: pd.Series, b: pd.Series) -> int:
 
 def default_config() -> dict:
     return {"text": {}, "types": {}, "dates": {}, "duplicates": {"enabled": False},
-            "missing": {}, "outliers": {}, "rename": {}, "replace": {}}
+            "missing": {}, "outliers": {}, "rename": {}, "replace": {}, "drop_columns": []}
 
 
 # ---------------------------------------------------------------- missing values
@@ -171,6 +171,19 @@ def clean_dates(df, columns, out_format="%Y-%m-%d", dayfirst=False):
                           "warning" if invalid else "info"))
     return out, log
 
+# ---------------------------------------------------------------- drop columns
+def drop_columns(df, columns):
+    """Remove columns. Refuses to remove every column."""
+    cols = [c for c in (columns or []) if c in df.columns]
+    if not cols:
+        return df.copy(), []
+    if len(cols) >= df.shape[1]:
+        return df.copy(), [_entry("Drop Columns", ", ".join(map(str, cols)), 0,
+                                  "Skipped: this would remove every column.", "warning")]
+    log = [_entry("Drop Columns", c, int(df[c].notna().sum()),
+                  f"Dropped column ({int(df[c].notna().sum())} non-missing value(s) removed)") for c in cols]
+    return df.drop(columns=cols), log
+
 # ---------------------------------------------------------------- rename / replace
 def rename_columns(df, mapping: dict):
     """Rename columns. Empty names and names that already exist are skipped with a warning."""
@@ -209,8 +222,9 @@ def replace_values(df, rules: dict):
 # ---------------------------------------------------------------- pipeline
 def run_pipeline(df: pd.DataFrame, config: dict):
     """Apply configured operations in a fixed, reproducible order.
-    Order: replace values -> text -> dates -> types -> duplicates -> missing -> outliers -> rename.
-    Rename runs last so every other setting can keep referring to the original column names."""
+    Order: drop columns -> replace values -> text -> dates -> types -> duplicates -> missing -> outliers -> rename.
+    Dropped columns are removed first, so settings that mention them are ignored and duplicates are detected on
+    the remaining columns. Rename runs last so every other setting can keep using the original column names."""
     out, log = df.copy(), []
     if config.get("replace"):
         out, l = replace_values(out, config["replace"])

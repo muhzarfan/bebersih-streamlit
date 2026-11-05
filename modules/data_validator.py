@@ -19,7 +19,9 @@ def empty_columns(df: pd.DataFrame) -> list:
 
 
 def config_is_destructive(config: dict) -> bool:
-    """True if the configuration may remove rows."""
+    """"True if the configuration may remove rows or columns."""
+    if config.get("drop_columns"):
+        return True
     if config.get("duplicates", {}).get("enabled"):
         return True
     if any(r.get("method") == "drop_rows" for r in config.get("missing", {}).values()):
@@ -31,7 +33,7 @@ def validate_config(config: dict, df: pd.DataFrame) -> list:
     """Return warnings about config entries that reference unknown columns."""
     cols = set(df.columns)
     issues = []
-    for section in ("missing", "types", "outliers", "rename", "replace"):
+    for section in ("missing", "types", "outliers", "rename", "replace", "drop_columns"):
         for c in config.get(section, {}):
             if c not in cols:
                 issues.append(f"Column '{c}' in '{section}' does not exist.")

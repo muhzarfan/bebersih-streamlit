@@ -41,7 +41,8 @@ def to_text(rep: dict) -> str:
     L += [f"  Text: {c.get('text') or '-'}", f"  Dates: {c.get('dates') or '-'}",
           f"  Types: {c.get('types') or '-'}", f"  Duplicates: {c.get('duplicates') or '-'}",
           f"  Missing: {c.get('missing') or '-'}", f"  Outliers: {c.get('outliers') or '-'}",
-          f"  Rename columns: {c.get('rename') or '-'}", f"  Replace values: {c.get('replace') or '-'}", "",
+          f"  Rename columns: {c.get('rename') or '-'}", f"  Replace values: {c.get('replace') or '-'}",
+          f"  Drop columns: {c.get('drop_columns') or '-'}", "",
           "4. OPERATIONS PERFORMED"]
     L += [f"  [{e['level'].upper()}] {e['operation']} | {e['column']} | affected={e['affected']} | {e['detail']}"
           for e in rep["log"]] or ["  None"]

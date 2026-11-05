@@ -132,18 +132,14 @@ If the result is not what you expected, you can return to Data Cleaning, change 
 ### 1. Download the Project
 
 ```bash
-git clone https://github.com/USERNAME/REPOSITORY.git
+git clone https://github.com/muhzarfan/bebersih-streamlit.git
 ```
-
-Replace `USERNAME/REPOSITORY` with the GitHub address of this project.
 
 ### 2. Open the Project Folder
 
 ```bash
-cd PROJECT_FOLDER
+cd bebersih-streamlit
 ```
-
-Replace `PROJECT_FOLDER` with the name of the folder created when you downloaded the project.
 
 ### 3. Install the Required Packages
 

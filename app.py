@@ -46,7 +46,7 @@ def cached_exports(df):
 def cached_outliers(df):
     return od.summarize(df)
 
-WIDGET_PREFIXES = ("mv_", "mvv_", "dup_", "tx_", "ty_", "dt_", "rn_", "rnsel", "rpsel", "ex_")
+WIDGET_PREFIXES = ("mv_", "mvv_", "dup_", "tx_", "ty_", "dt_", "rn_", "rnsel", "rpsel", "ex_", "dcsel", "dcthr")
 MAX_UNIQUE_REPLACE = 200
 
 def reset_results():
@@ -231,7 +231,7 @@ def page_cleaning():
     cfg = dc.default_config()
     cfg["outliers"] = dict(st.session_state.config.get("outliers", {}))
     cols = list(df.columns)
-    t = st.tabs(["Missing Values", "Duplicates", "Text", "Data Types", "Dates", "Outliers", "Rename & Replace"])
+    t = st.tabs(["Missing Values", "Duplicates", "Text", "Data Types", "Dates", "Outliers", "Rename & Replace", "Drop Columns"])
     with t[0]:
         miss_cols = [c for c in cols if df[c].isna().any()]
         if not miss_cols:
@@ -308,18 +308,33 @@ def page_cleaning():
             if rules:
                 cfg["replace"][c] = rules
         st.session_state.replace_saved = saved_rules
+    with t[7]:
+        st.caption("Dropped columns are removed first, so settings for them in other tabs are ignored, and "
+                   "duplicates are detected on the remaining columns.")
+        miss_pct = df.isna().mean().mul(100).round(2)
+        st.session_state.setdefault("dcthr", 50.0)
+        thr = st.number_input("Suggest columns with missing values above (%)", min_value=0.0, max_value=100.0,
+                              step=5.0, key="dcthr")
+        sugg = [c for c in cols if miss_pct[c] > thr]
+        st.button(f"Select {len(sugg)} suggested column(s)", disabled=not sugg,
+                  on_click=lambda s=sugg: st.session_state.update(dcsel=s))
+        cfg["drop_columns"] = st.multiselect("Columns to drop", cols, key="dcsel")
+        st.dataframe(pd.DataFrame({"Column": cols, "Type": [str(df[c].dtype) for c in cols],
+                                   "Missing %": [miss_pct[c] for c in cols]}).sort_values(
+            "Missing %", ascending=False), hide_index=True, width="stretch")
     save_widgets()
     st.divider()
     st.subheader("Preview")
     for w in dv.validate_config(cfg, df):
         st.warning(w)
     preview, log = dc.run_pipeline(df, cfg)
-    a, b, c = st.columns(3)
+    a, b, c, d = st.columns(4)
     a.metric("Rows", f"{len(preview):,}", delta=len(preview) - len(df))
     b.metric("Missing values", f"{int(preview.isna().sum().sum()):,}",
              delta=int(preview.isna().sum().sum() - df.isna().sum().sum()))
     c.metric("Duplicate rows", f"{int(preview.duplicated().sum()):,}",
              delta=int(preview.duplicated().sum() - df.duplicated().sum()))
+    d.metric("Columns", f"{preview.shape[1]:,}", delta=preview.shape[1] - df.shape[1])
     for e in log:
         if e["level"] == "warning":
             st.warning(f"{e['operation']} / {e['column']}: {e['detail']}")
@@ -331,8 +346,9 @@ def page_cleaning():
     lost = len(df) - len(preview)
     confirmed = True
     if destructive:
-        st.warning(f"These settings may remove rows ({lost} would be removed in this preview).")
-        confirmed = st.checkbox("I understand and confirm that rows may be removed", key="confirm_loss")
+        st.warning(f"These settings may remove data: {lost} row(s) and {df.shape[1] - preview.shape[1]} "
+                   "column(s) in this preview.")
+        confirmed = st.checkbox("I understand and confirm that data may be removed", key="confirm_loss")
     if st.button("Apply cleaning", type="primary", disabled=not confirmed):
         st.session_state.cleaned, st.session_state.log = preview, log
         st.session_state.config = cfg
