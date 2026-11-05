@@ -3,7 +3,7 @@ import pandas as pd
 
 from modules import data_profiler as dp
 from modules import outlier_detector as od
-
+from modules import data_cleaner as dc
 
 def metrics(df: pd.DataFrame) -> dict:
     return {"rows": int(df.shape[0]), "columns": int(df.shape[1]),
@@ -17,9 +17,14 @@ def build_report(original, cleaned, config, log, file_info=None) -> dict:
     before, after = metrics(original), metrics(cleaned)
     ren = (config or {}).get("rename") or {}
     new_name = lambda c: ren.get(c, c) if ren.get(c, c) in cleaned.columns else c
-    changes = [{"Column": new_name(c), "Before": str(original[c].dtype), "After": str(cleaned[new_name(c)].dtype)}
-               for c in original.columns
-               if new_name(c) in cleaned.columns and str(original[c].dtype) != str(cleaned[new_name(c)].dtype)]
+    changes = []
+    for c in original.columns:
+        n = new_name(c)
+        if n in cleaned.columns:
+            b_dt, a_dt = str(original[c].dtype), str(cleaned[n].dtype)
+            b_lb, a_lb = dc.current_type_label(original[c]), dc.current_type_label(cleaned[n])
+            if b_dt != a_dt or b_lb != a_lb:
+                changes.append({"Column": n, "Before": f"{b_dt} ({b_lb})", "After": f"{a_dt} ({a_lb})"})
     return {"file_info": file_info or {}, "before": before, "after": after,
             "issues": {"inconsistencies": dp.inconsistency_report(original),
                        "missing": dp.missing_summary(original),

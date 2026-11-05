@@ -260,10 +260,14 @@ def page_cleaning():
                            "collapse": st.checkbox("Collapse repeated spaces", True, key="tx_c"),
                            "case": cases}
     with t[3]:
+        st.caption("Each dropdown starts at the column's current type. Leave it unchanged to keep the column as is.")
         pick = st.multiselect("Columns to convert", cols, key="ty_cols")
         for c in pick:
-            to = st.selectbox(f"{c} (currently {df[c].dtype})", ["Integer", "Float", "String", "Datetime"], key=f"ty_{c}")
-            cfg["types"][c] = to
+            cur = dc.current_type_label(df[c])
+            st.session_state.setdefault(f"ty_{c}", cur)
+            to = st.selectbox(f"{c} (current type: {cur}, dtype {df[c].dtype})", dc.TYPE_OPTIONS, key=f"ty_{c}")
+            if to != cur:
+                cfg["types"][c] = to
     with t[4]:
         dcols = st.multiselect("Date columns", cols, key="dt_cols")
         if dcols:

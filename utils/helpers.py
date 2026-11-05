@@ -4,6 +4,8 @@ import warnings
 
 import pandas as pd
 
+# values such as "14:30", "2:30 PM", "14:30:05" (a time without a date)
+TIME_ONLY = re.compile(r"^\s*\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?\s*([AaPp][Mm])?\s*$")
 
 def is_text_dtype(s: pd.Series) -> bool:
     """True for object / string columns (works for pandas 2 and 3)."""

@@ -1,11 +1,12 @@
 """Cleaning operations. Every function returns new objects; inputs are never modified."""
 import re
+import datetime as dt
 
 import numpy as np
 import pandas as pd
 
 from modules import outlier_detector as od
-from utils.helpers import is_numeric, is_text_dtype, parse_dates
+from utils.helpers import TIME_ONLY, is_numeric, is_text_dtype, parse_dates
 
 METHODS = ["No action", "Drop rows", "Mean", "Median", "Mode", "Custom value"]
 _METHOD_KEY = {"No action": "none", "Drop rows": "drop_rows", "Mean": "mean",
@@ -118,24 +119,67 @@ def clean_text(df, columns, strip=True, collapse=True, case="none"):
                               f"(strip={strip}, collapse spaces={collapse}, case={col_case})"))
     return out, log
 
-
 # ---------------------------------------------------------------- types
+TYPE_OPTIONS = ["Integer", "Float", "String", "Boolean", "Category", "Datetime", "Date", "Time", "Object"]
+_BOOL_MAP = {"true": True, "t": True, "yes": True, "y": True, "ya": True, "1": True, "1.0": True,
+             "false": False, "f": False, "no": False, "n": False, "tidak": False, "0": False, "0.0": False}
+
+
+def current_type_label(s: pd.Series) -> str:
+    """Friendly type name of a column, one of TYPE_OPTIONS."""
+    if pd.api.types.is_bool_dtype(s):
+        return "Boolean"
+    if pd.api.types.is_integer_dtype(s):
+        return "Integer"
+    if pd.api.types.is_float_dtype(s):
+        return "Float"
+    if pd.api.types.is_datetime64_any_dtype(s):
+        return "Datetime"
+    if isinstance(s.dtype, pd.CategoricalDtype):
+        return "Category"
+    kinds = {type(v) for v in s.dropna().head(1000)}
+    if kinds <= {str}:
+        return "String"
+    if kinds == {dt.date}:
+        return "Date"
+    if kinds == {dt.time}:
+        return "Time"
+    return "Object"
+
+
 def convert_type(s: pd.Series, target: str):
     """Return (converted series or None if refused, message, level)."""
     na_before = int(s.isna().sum())
-    if target == "String":
-        return s.map(lambda v: v if pd.isna(v) else str(v)), "Converted to string", "info"
-    if target == "Datetime":
-        res = parse_dates(s)
-    else:
-        num = pd.to_numeric(s, errors="coerce")
-        if target == "Integer":
-            valid = num.dropna()
-            if (valid % 1 != 0).any():
-                return None, "Conversion to Integer refused: column contains decimal values.", "warning"
-            res = num.astype("Int64")
+    try:
+        if target == "String":
+            return s.map(lambda v: v if pd.isna(v) else str(v)), "Converted to string", "info"
+        if target == "Object":
+            return s.astype(object), "Converted to object", "info"
+        if target == "Category":
+            return s.astype("category"), "Converted to category", "info"
+        if target == "Datetime":
+            txt = s.dropna()
+            if len(txt) and txt.map(lambda v: isinstance(v, str) and bool(TIME_ONLY.match(v))).mean() >= 0.9:
+                return None, ("Conversion to Datetime refused: the values contain a time only, so today's date "
+                              "would be filled in. Use the Time type instead."), "warning"
+            res = parse_dates(s)
+        elif target in ("Date", "Time"):
+            parsed = parse_dates(s)
+            res = (parsed.dt.date if target == "Date" else parsed.dt.time).where(parsed.notna(), np.nan)
+        elif target == "Boolean":
+            res = s.map(lambda v: pd.NA if pd.isna(v) else _BOOL_MAP.get(str(v).strip().lower(), pd.NA)
+                        ).astype("boolean")
         else:
-            res = num.astype(float)
+            num = pd.to_numeric(s, errors="coerce")
+            if target == "Integer":
+                valid = num.dropna()
+                if (valid % 1 != 0).any():
+                    return None, "Conversion to Integer refused: column contains decimal values.", "warning"
+                res = num.astype("Int64")
+            else:
+                res = num.astype(float)
+    except (TypeError, ValueError, OverflowError) as e:
+        return None, f"Conversion to {target} failed: {e}", "warning"
     new_na = int(res.isna().sum()) - na_before
     if new_na > 0:
         return res, f"Converted to {target}; {new_na} value(s) could not be converted and became missing", "warning"
@@ -145,17 +189,16 @@ def convert_type(s: pd.Series, target: str):
 def convert_types(df, mapping: dict):
     out, log = df.copy(), []
     for c, target in mapping.items():
-        if c not in out.columns or target in (None, "No change"):
+        if c not in out.columns or target in (None, "No change") or current_type_label(out[c]) == target:
             continue
         res, msg, level = convert_type(out[c], target)
         if res is None:
             log.append(_entry("Type Conversion", c, 0, msg, level))
             continue
-        old = str(out[c].dtype)
+        old = current_type_label(out[c])
         out[c] = res
-        log.append(_entry("Type Conversion", c, len(out), f"{old} -> {res.dtype}. {msg}", level))
+        log.append(_entry("Type Conversion", c, len(out), f"{old} -> {target}. {msg}", level))
     return out, log
-
 
 # ---------------------------------------------------------------- dates
 def clean_dates(df, columns, out_format="%Y-%m-%d", dayfirst=False):

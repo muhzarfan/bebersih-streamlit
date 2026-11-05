@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.helpers import date_shape, is_numeric, is_text_dtype, parse_dates, pct
+from utils.helpers import TIME_ONLY, date_shape, is_numeric, is_text_dtype, parse_dates, pct
 
 
 def missing_summary(df: pd.DataFrame) -> pd.DataFrame:
@@ -34,6 +34,8 @@ def dtype_analysis(df: pd.DataFrame) -> pd.DataFrame:
             txt = nn.astype(str).str.strip()
             if _ratio(pd.to_numeric(txt, errors="coerce").notna(), len(txt)) >= 0.9:
                 suggestion, note = "Numeric", "Text values that look numeric"
+            elif txt.map(lambda v: bool(TIME_ONLY.match(v))).mean() >= 0.9:
+                suggestion, note = "Time", "Text values that look like times (no date)"
             elif _ratio(parse_dates(txt).notna(), len(txt)) >= 0.9:
                 suggestion, note = "Datetime", "Text values that look like dates"
             if nn.map(type).nunique() > 1:
