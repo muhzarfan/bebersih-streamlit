@@ -1,80 +1,177 @@
-# Bebersih - Automated Data Cleaning Website
+# Bebersih – Data Cleaning App
 
-A Streamlit application for profiling, cleaning and exporting tabular data. Built as a Data Analyst portfolio project.
-Every metric, chart and report figure is computed from the uploaded dataset. The original data is never modified:
-cleaning always runs on a separate copy, so results are reproducible.
+Bebersih is a web app for checking and cleaning data before it is used for analysis.
+
+Upload a CSV or Excel file, review the issues found in the data, choose how to handle them, and download the cleaned file.
+
+This project was created as part of a Data Analyst portfolio.
 
 ## Main Features
-- **Upload:** CSV (automatic encoding and delimiter detection) or Excel (.xlsx, .xls) with sheet selection, file information and dataset preview
-- **Data Quality Analysis:** missing values, duplicate records, data type analysis, inconsistent text and date formats, numeric and categorical statistics, and a transparent quality score
-- **Outlier Detection:** IQR method (1.5 x IQR) with interactive Plotly boxplots, detected outlier records, and a per-column Keep / Remove / Capping plan with a before/after preview
-- **Data Cleaning (user-approved, never automatic):**
-  - Missing values: drop rows, mean, median, mode or custom value, chosen per column
-  - Duplicates: all columns or selected columns, keep first or last occurrence
-  - Text cleaning: trim whitespace, collapse repeated spaces, capitalisation set per column (for example Title Case for city names and UPPERCASE for abbreviations)
-  - Data type conversion: integer, float, string, datetime, with warnings for failed conversions
-  - Date standardisation: flexible parsing and a user-chosen output format
-  - Rename columns and fix values (typos and inconsistent labels) through an editable table
-  - Outlier treatment integrated from the Outlier Detection page
-- **Safety:** preview before applying, a warning and explicit confirmation when rows may be removed, and settings that are remembered when you switch pages
-- **Before & After Comparison:** KPI cards, interactive charts, data previews and a summary of changes
-- **Cleaning Report:** issues found, methods chosen, operations performed, remaining issues, data type changes and a quality score before and after
-- **Export:** custom file name, then download as CSV, Excel (.xlsx) or a text report
-- **Themes:** light and dark mode (configured in `.streamlit/config.toml`)
 
-## Technology Stack
-Python, Streamlit, Pandas, NumPy, OpenPyXL, Plotly, Pytest
+### 1. Upload and Preview Data
 
-## Project Structure
+Upload a file in one of these formats:
+- CSV
+- Excel (`.xlsx` or `.xls`)
+
+After uploading, you can view basic file information and preview the data.
+
+### 2. Check Data Quality
+
+The app checks for common data issues, including:
+
+- **Missing values:** cells that have no value.
+- **Duplicate rows:** records that appear more than once.
+- **Incorrect data formats:** for example, numbers that are read as text.
+- **Inconsistent text:** extra spaces or different ways of writing the same category.
+- **Different date formats:** dates written in more than one format.
+
+You can also view simple summaries of number and category columns, along with an overall data quality score.
+
+### 3. Find Unusual Values
+
+Some values may be very different from most of the other values in a column. For example, most orders may be worth a few hundred thousand, while one order is worth several million.
+
+The app highlights these values in charts and in a list. For each column, you can choose to:
+
+- **Keep:** leave the values as they are.
+- **Remove:** remove rows that contain the selected values.
+- **Limit:** reduce unusually high or low values to a chosen limit.
+
+A value that looks unusual is not always wrong. Review it before deciding what to do.
+
+### 4. Clean the Data
+
+Choose how to handle each issue based on your needs.
+
+| Issue | Available actions |
+|---|---|
+| Missing values | Remove rows or fill empty cells using the average, middle value, most common value, or a value you enter |
+| Duplicate rows | Remove repeated rows using all columns or selected columns |
+| Text | Remove extra spaces and make text use a consistent letter style |
+| Data format | Change a column to numbers, text, or dates |
+| Dates | Use one date format throughout a column |
+| Column names | Rename columns |
+| Inconsistent values | Correct spelling mistakes or use the same name for matching categories |
+| Unusual values | Keep, remove, or limit selected values |
+
+You can preview the planned changes before applying them. If your choices may remove rows, the app shows a warning and asks you to confirm.
+
+### 5. Compare Before and After
+
+After cleaning the data, compare the original file with the cleaned version.
+
+The comparison includes:
+- A summary of the data before and after cleaning.
+- Charts showing the changes.
+- Data previews.
+- A list of the changes made.
+
+### 6. View the Cleaning Report
+
+The app creates a report with:
+- Issues found in the original data.
+- The actions chosen to handle those issues.
+- Changes made during cleaning.
+- Issues that may still remain.
+- Data quality scores before and after cleaning.
+
+### 7. Download the Results
+
+Choose a file name and download the results as:
+- CSV
+- Excel (`.xlsx`)
+- A text report
+
+## How to Use the App
+
+1. **Upload a file** from the Dashboard.
+2. **Check the data** to see if there are missing values, repeated rows, or inconsistent entries.
+3. **Review unusual values** and decide whether to keep, remove, or limit them.
+4. **Choose how to clean the data** on the Data Cleaning page.
+5. **Preview and confirm** your choices before applying them.
+6. **Review the results** on the Before & After Comparison and Cleaning Report pages.
+7. **Download the cleaned file** from the Export Dataset page.
+
+If the result is not what you expected, you can return to Data Cleaning, change your choices, and apply them again.
+
+## App Screenshots
+
+### Dashboard
+![Bebersih Dashboard](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/dashboard.jpg)
+
+### Data Quality Analysis
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/dataqualityanalysis.jpg)
+
+### Outlier Detection
+![Outlier Detection](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/outlier.jpg)
+
+### Data Cleaning
+![Data Cleaning]()
+
+### Before & After Comparison
+<!-- Add Before & After Comparison screenshot here -->
+
+### Cleaning Report
+<!-- Add Cleaning Report screenshot here -->
+
+### Export Dataset
+<!-- Add Export Dataset screenshot here -->
+
+## Tools Used
+
+- **Python** – used to build the app.
+- **Streamlit** – used to create the web app.
+- **Pandas and NumPy** – used to work with the data.
+- **OpenPyXL** – used to read and work with Excel files.
+- **Plotly** – used to create interactive charts.
+- **Pytest** – used to test parts of the app.
+
+## Run the App on Your Computer
+
+### 1. Download the Project
+
+```bash
+git clone https://github.com/USERNAME/REPOSITORY.git
 ```
-app.py                          Streamlit UI (pages only)
-requirements.txt
-.streamlit/config.toml          Light and dark theme settings
-modules/data_loader.py          File reading, encoding and delimiter handling
-modules/data_profiler.py        Data quality analysis and quality score
-modules/outlier_detector.py     IQR detection and treatment
-modules/data_cleaner.py         Cleaning operations and the ordered pipeline
-modules/data_validator.py       Validation of datasets and cleaning configuration
-modules/report_generator.py     Before/after metrics and report text
-utils/helpers.py                Shared helpers
-utils/export.py                 CSV / Excel / text export and file name sanitising
+
+Replace `USERNAME/REPOSITORY` with the GitHub address of this project.
+
+### 2. Open the Project Folder
+
+```bash
+cd PROJECT_FOLDER
 ```
 
-## Installation
+Replace `PROJECT_FOLDER` with the name of the folder created when you downloaded the project.
+
+### 3. Install the Required Packages
+
 ```bash
 pip install -r requirements.txt
 ```
-Streamlit 1.50 or newer is required.
 
-## Run
+Streamlit version 1.50 or newer is required.
+
+### 4. Start the App
+
 ```bash
 streamlit run app.py
 ```
 
-## Example Usage
-1. **Dashboard:** upload your own dataset file.
-2. **Data Quality Analysis:** review missing values, duplicates, whitespace, capitalisation variants and mixed date formats.
-3. **Outlier Detection:** inspect the boxplot and records, then choose Keep, Remove or Capping per column.
-4. **Data Cleaning:** work through the tabs (Missing Values, Duplicates, Text, Data Types, Dates, Outliers, Rename & Replace), review the preview, confirm if rows may be removed, then click Apply cleaning.
-5. **Before & After Comparison / Cleaning Report:** check the effect of your choices. If something was missed, go back to Data Cleaning, adjust the settings and apply again.
-6. **Export Dataset:** type a file name and download the CSV, Excel or report.
+Once the app starts, open the local address shown in your terminal in a web browser.
 
-## Design Decisions
-- **The original dataset is always the source.** Each time you apply cleaning, the whole configuration runs again on the original data. Nothing is applied twice, and mistakes are fixed by changing a setting and applying again.
-- **Fixed pipeline order:** replace values, text cleaning, dates, data types, duplicates, missing values, outliers, rename columns.
-  - Value fixes run first because the table shows values exactly as they appear in the original data.
-  - Duplicates are removed before imputation so that imputation cannot create false duplicates.
-  - Renaming runs last so every other setting can keep referring to the original column names.
-- **Integer conversion is refused** if it would drop decimals. Failed conversions are reported as new missing values.
-- **Outlier counts after cleaning are recomputed** on the cleaned data with the same IQR method. After capping, quartiles shift, so a few borderline points can still be flagged.
-- **Outliers are not assumed to be errors.** Detection never changes data. Extreme values can be valid business cases, so the choice is left to the user.
-- **Quality score is transparent:** the average of Completeness (share of non-missing cells), Uniqueness (share of non-duplicate rows) and Consistency (share of columns without whitespace, capitalisation or date-format issues), each from 0 to 100.
-- **Empty cells in the Fix values table are ignored**, so values are never deleted by accident.
+## Notes and Limitations
 
-## Known Limitations
-- IQR assumes a roughly symmetric distribution. Skewed columns (for example prices or durations) often show many outliers that are valid, and binary 0/1 columns are not meaningful for IQR analysis.
-- Fix values uses exact matching and is limited to text columns with at most 200 unique values.
-- Reading old `.xls` files requires the `xlrd` package (included in `requirements.txt`).
+- **Unusual values are not always errors.** They may be valid records, so check them before removing or limiting them.
+- **The unusual-value check has limits.** It may mark many values in columns where values are unevenly spread, such as prices or durations. It is also not useful for columns that only contain 0 and 1.
+- **Value replacement uses exact matches.** It is available for text columns with up to 200 different values.
+- **Older Excel files (`.xls`)** need the `xlrd` package, which is included in the project requirements.
 
-## Screenshots
-Add screenshots here (for example `docs/dashboard.png`, `docs/outliers.png`, `docs/comparison.png`).
+## How Changes Are Applied
+
+The original uploaded data is kept unchanged. Each time you apply your cleaning choices, the app starts again from the original data and applies your current choices to a separate copy.
+
+This means that changes are not added on top of previous cleaning results. If you want to change something, update your choices and apply them again.
+
+The app also follows a set order when applying the selected changes so that the steps work consistently.
