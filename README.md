@@ -188,12 +188,6 @@ streamlit run app.py
 
 Once the app starts, open the local address shown in your terminal in a web browser.
 
-### 5. Run the Tests (Optional)
-
-```bash
-python -m pytest
-```
-
 ## Notes and Limitations
 
 - **Unusual values are not always errors.** They may be valid records, so check them before removing or limiting them.
