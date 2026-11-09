@@ -105,25 +105,50 @@ If the result is not what you expected, you can return to Data Cleaning, change 
 ## App Screenshots
 
 ### Dashboard
-![Bebersih Dashboard](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/dashboard.jpg)
+![Bebersih Dashboard](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/dashboard1.jpg)
+![Bebersih Dashboard](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/dashboard2-1.jpg)
 
 ### Data Quality Analysis
-![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/dataqualityanalysis.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality2.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality3.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality4.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality4.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality5.jpg)
+![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality6.jpg)
 
 ### Outlier Detection
-![Outlier Detection](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/outlier.jpg)
+![Outlier Detection](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/outlier1-1.jpg)
+![Outlier Detection](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/outlier2-1.jpg)
+![Outlier Detection](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/outlier3-1.jpg)
+![Outlier Detection](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/outlier4-1.jpg)
 
 ### Data Cleaning
-<!-- Add Data Cleaning screenshot here -->
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning1-2.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning2-2.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning3-1.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning4.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning5.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning6.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning7.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning8.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning9.jpg)
+![Data Cleaning](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/cleaning10.jpg)
 
 ### Before & After Comparison
-<!-- Add Before & After Comparison screenshot here -->
+![Data Comparison](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/comparison1.jpg)
+![Data Comparison](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/comparison2.jpg)
+![Data Comparison](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/comparison3.jpg)
+![Data Comparison](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/comparison4.jpg)
+![Data Comparison](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/comparison5.jpg)
 
 ### Cleaning Report
-<!-- Add Cleaning Report screenshot here -->
+![Cleaning Report](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/report1.jpg)
+![Cleaning Report](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/report2.jpg)
+![Cleaning Report](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/report3.jpg)
 
 ### Export Dataset
-<!-- Add Export Dataset screenshot here -->
+![Export Dataset](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/export.jpg)
 
 ## Tools Used
 
