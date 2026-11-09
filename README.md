@@ -113,7 +113,6 @@ If the result is not what you expected, you can return to Data Cleaning, change 
 ![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality2.jpg)
 ![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality3.jpg)
 ![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality4.jpg)
-![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality4.jpg)
 ![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality5.jpg)
 ![Data Quality Analysis](https://muhzharfan.wordpress.com/wp-content/uploads/2026/11/quality6.jpg)
 
@@ -223,3 +222,13 @@ The app also follows a set order when applying the selected changes so that the 
 8. Rename columns.
 
 This order matters. Renaming is done last so that every other choice can still use the original column names. Duplicates are removed before empty cells are filled, so that filling cells cannot create false duplicates.
+
+## About Author
+
+Created by **Muhammad Zharfan Alfanso** – aspiring data analyst.
+
+- LinkedIn: [linkedin.com/in/muhammad-zharfan-alfanso/](https://www.linkedin.com/in/muhammad-zharfan-alfanso/)
+- GitHub: [github.com/muhzarfan](https://github.com/muhzarfan)
+- Email: zarfan.alf@gmail.com
+
+Feedback and suggestions are welcome.
